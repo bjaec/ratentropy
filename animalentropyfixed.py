@@ -13,6 +13,7 @@ import numpy as np
 import statistics
 
 df = pd.read_excel(r'/Users/bryantchung/Downloads/ExtraCurricular/UCI/transitionmarkov/data/temporaloutput.xls', usecols=range(1,256), header=None) 
+#MUST OFFSET EXCEL SHEET ONE COLUMN TO THE RIGHT FOR CODE TO WORK (otherwise pandas skips over data titles since they are in the first column)
 transitions = [] 
 #E=m, F=p, G=r, H=a, I=b,J=c,K=d (associated the different locations with letters adjacent on ASCII table)
 #each are just place holders (Ex: ord value of 3 just means it went to C)
