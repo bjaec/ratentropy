@@ -7,13 +7,11 @@ Created on Sun Feb 28 18:20:03 2021
 """
 
 import pandas as pd
-from openpyxl import load_workbook
 import math 
 import numpy as np 
-import statistics
+import statistics as st
 
-df = pd.read_excel(r'/Users/bryantchung/Downloads/ExtraCurricular/UCI/transitionmarkov/data/temporaloutput.xls', usecols=range(1,256), header=None) 
-#MUST OFFSET EXCEL SHEET ONE COLUMN TO THE RIGHT FOR CODE TO WORK (otherwise pandas skips over data titles since they are in the first column)
+df = pd.read_excel(r'/Users/bryantchung/Downloads/ExtraCurricular/UCI/transitionmarkov/data/nontemporaloutputMarch26_2016.xls', usecols=range(0,257), header=None) 
 transitions = [] 
 #E=m, F=p, G=r, H=a, I=b,J=c,K=d (associated the different locations with letters adjacent on ASCII table)
 #each are just place holders (Ex: ord value of 3 just means it went to C)
@@ -37,13 +35,14 @@ prob_matrix2 = np.zeros((size, size))
 #variables to print out to excel 
 place=0
 df5=pd.DataFrame()
+exceldf = pd.DataFrame()
 
 #finds numerical difference between two points   
 def rank(c):
    return ord(c) - ord('A')
 
-#iterates through 182 rows
-for rowindex in range(182):
+rowcount = len(df.index)
+for rowindex in range(rowcount):
     length = len(df.columns)
     for columnindex in range(length):
         c = df.iloc[rowindex, columnindex]
@@ -150,9 +149,14 @@ for rowindex in range(182):
     #values for first 5 mins of each row
     if rowindex!=0:
         beforetitle=df.iloc[rowindex-1, 0]
-        if (title[7:9]=="S2" and beforetitle[7:9] =="S1") or (title[4]=="S" and beforetitle[4]=="E")or (title[4]=="W" and beforetitle[4]=="S"):
-            df5.insert(place, beforetitle[4:9], [statistics.mean(wght_avg)], True)
-            df5.insert(place+1, beforetitle[4:9], [statistics.mean(wght_avg2)], True)
+        #df5.append(wght_avg)
+        if (title[7:9]=="S2" and beforetitle[7:9] =="S1") or (title[4]=="S" and beforetitle[4]=="E")or (title[4]=="W" and beforetitle[4]=="S") or (rowindex==rowcount-1):
+            name = beforetitle[4:9]
+            wght_avg.append(st.mean(wght_avg))
+            wght_avg2.append(st.mean(wght_avg2))
+            additional = pd.DataFrame({name: wght_avg})
+            additional2 = pd.DataFrame({name: wght_avg2})
+            exceldf = pd.concat([exceldf, additional, additional2], axis=1) 
             wght_avg=[]
             wght_avg2=[]
             place+=2
@@ -166,8 +170,8 @@ for rowindex in range(182):
     entropy2=[]
     #resets variables for next row
     
-writer = pd.ExcelWriter('entropytemporalanalysis.xlsx', engine='xlsxwriter')
-df5.to_excel(writer, sheet_name="output", index=False, startrow=0)
+writer = pd.ExcelWriter('entropynontemporalanalysis2.xlsx', engine='xlsxwriter')
+exceldf.to_excel(writer, sheet_name="output", index=False, startrow=0)
 writer.save()              
 writer.close()
   
